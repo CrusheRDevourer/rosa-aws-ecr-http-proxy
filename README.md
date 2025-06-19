@@ -41,7 +41,7 @@ docker run -d --name docker-registry-proxy --net=host \
   -e ENABLE_SSL=true \
   -e REGISTRY_HTTP_TLS_KEY=/opt/ssl/key.pem \
   -e REGISTRY_HTTP_TLS_CERTIFICATE=/opt/ssl/certificate.pem \
-  esailors/aws-ecr-http-proxy:latest
+  crusherd/aws-ecr-proxy-rootless:latest
 ```
 
 If you ran this command on "registry-proxy.example.com" you can now get your images using `docker pull registry-proxy.example.com:5005/repo/image`.
