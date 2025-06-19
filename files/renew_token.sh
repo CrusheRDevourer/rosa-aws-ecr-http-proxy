@@ -16,7 +16,7 @@ while true; do
 done
 
 set +x
-echo $TOKEN > /usr/local/openresty/nginx/token.txt
+echo $TOKEN > /tmp/token
 set -x
 
-nginx -s reload
+supervisorctl signal HUP nginx

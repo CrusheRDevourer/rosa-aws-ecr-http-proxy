@@ -1,14 +1,10 @@
-<p align="left">
-    <a href="https://hub.docker.com/r/esailors/aws-ecr-http-proxy" alt="Pulls">
-        <img src="https://img.shields.io/docker/pulls/esailors/aws-ecr-http-proxy" /></a>
-    <a href="https://www.esailors.de" alt="Maintained">
-        <img src="https://img.shields.io/maintenance/yes/2022.svg" /></a>
+# aws-ecr-proxy-rootless
 
-</p>
+A very simple nginx push/pull proxy that forwards requests to AWS ECR and caches the responses locally.  This is a fork of the original repository that aims to add a few features:
 
-# aws-ecr-http-proxy
-
-A very simple nginx push/pull proxy that forwards requests to AWS ECR and caches the responses locally.
+- Support for running as a non-root user (compatability with Openshift, ROSA etc)
+- Migrating to an Enterprise Linux Base (in this case AlmaLinux 9)
+- Inclusion of a helm chart for deployment to a kubernetes cluster (based on this chart https://github.com/evryfs/helm-charts/tree/master/charts/ecr-proxy)
 
 ### Configuration:
 The proxy is packaged in a docker container and can be configured with following environment variables:
@@ -35,7 +31,7 @@ docker run -d --name docker-registry-proxy --net=host \
   -v /registry/local-storage/cache:/cache \
   -v /registry/certificate.pem:/opt/ssl/certificate.pem \
   -v /registry/key.pem:/opt/ssl/key.pem \
-  -e PORT=5000 \
+  -e PORT=5005 \
   -e RESOLVER=8.8.8.8 \
   -e UPSTREAM=https://XXXXXXXXXX.dkr.ecr.eu-central-1.amazonaws.com \
   -e AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} \
@@ -48,17 +44,9 @@ docker run -d --name docker-registry-proxy --net=host \
   esailors/aws-ecr-http-proxy:latest
 ```
 
-If you ran this command on "registry-proxy.example.com" you can now get your images using `docker pull registry-proxy.example.com:5000/repo/image`.
+If you ran this command on "registry-proxy.example.com" you can now get your images using `docker pull registry-proxy.example.com:5005/repo/image`.
 
 ### Deploying the proxy
-
-#### Deploying with ansible
-
-Modify the ansible role [variables](https://github.com/eSailors/aws-ecr-http-proxy/tree/master/roles/docker-registry-proxy/defaults) according to your need and run the playbook as follow:
-```sh
-ansible-playbook -i hosts playbook-docker-registry-proxy.yaml
-```
-In case you want to enable SSL/TLS please replace the SSL certificates with the valid ones in [roles/docker-registry-proxy/files/*.pem](https://github.com/eSailors/aws-ecr-http-proxy/tree/master/roles/docker-registry-proxy/files)
 
 #### Deploying on Kubernetes with Helm
 You can install on Kubernetes using the [community-maintained chart](https://github.com/evryfs/helm-charts/tree/master/charts/ecr-proxy) like this:
@@ -69,7 +57,6 @@ helm install evryfs-oss/ecr-proxy --name ecr-proxy --namespace ecr-proxy
 ```
 
 See the [values-file](https://github.com/evryfs/helm-charts/blob/master/charts/ecr-proxy/values.yaml) for configuration parameters.
-
 
 ### Note on SSL/TLS
 The proxy is using `HTTP` (plain text) as default protocol for now. So in order to avoid docker client complaining either:
